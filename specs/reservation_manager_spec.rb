@@ -11,9 +11,9 @@ describe Hotel::ReservationManager do
     end
   end # initialize
 
-  describe "#rooms_and_reservations" do
+  describe "#generate_rooms" do
     before do
-      @rooms_and_reservations = @reservation_manager.rooms_and_reservations
+      @rooms_and_reservations = @reservation_manager.generate_rooms
     end
 
     it "returns a hash" do
@@ -55,23 +55,40 @@ describe Hotel::ReservationManager do
   end # view_rooms
 
   describe "#reserve_room" do
+
     before do
-      @reservation = @reservation_manager.reserve_room(1, "2018-04-05", "2018-04-10")
+      @room_number = 1
+      @start_date = Date.parse('2018-04-05')
+      @end_date = Date.parse('2018-04-10')
     end
 
     it "returns the instance of Reservation created" do
-      room_number = 1
-      start_date = Date.parse('2018-04-05')
-      end_date = Date.parse('2018-04-10')
 
-      @reservation.must_be_instance_of Hotel::Reservation
+      reservation = @reservation_manager.reserve_room(1, "2018-04-05", "2018-04-10")
 
-      @reservation.room_number.must_equal room_number
-      @reservation.start_date.must_equal start_date
-      @reservation.end_date.must_equal end_date
+      reservation.must_be_instance_of Hotel::Reservation
+      reservation.room_number.must_equal @room_number
+      reservation.start_date.must_equal @start_date
+      reservation.end_date.must_equal @end_date
     end
 
     it "pushes the created reservation to the array corresponding to the room number in the rooms_and_reservations hash" do
+      room_one_reservations = @reservation_manager.rooms_and_reservations[1]
+      room_one_reservations.must_be_instance_of Array
+      room_one_reservations.must_be_empty
+
+      reservation = @reservation_manager.reserve_room(1, "2018-04-05", "2018-04-10")
+
+      room_one_reservations = @reservation_manager.rooms_and_reservations[1]
+      room_one_reservations.must_be_instance_of Array
+      room_one_reservations.length.must_equal 1
+
+      room_one_reservation = room_one_reservations[0]
+
+      room_one_reservation.must_be_instance_of Hotel::Reservation
+      room_one_reservation.room_number.must_equal @room_number
+      room_one_reservation.start_date.must_equal @start_date
+      room_one_reservation.end_date.must_equal @end_date 
     end
 
   end # reserve_room
