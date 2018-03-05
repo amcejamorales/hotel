@@ -54,4 +54,35 @@ describe Hotel::ReservationManager do
     end
   end # view_rooms
 
+  describe "#reserve_room" do
+    before do
+      @room = @reservation_manager.reserve_room(1, "2018-04-05", "2018-04-10")
+    end
+
+    it "verifies the room number entered is valid" do
+      room = proc { @reservation_manager.reserve_room(21, "2018-04-05", "2018-04-10") }
+      room.must_raise
+
+      room = proc { @reservation_manager.reserve_room(0, "2018-04-05", "2018-04-10") }
+      room.must_raise
+
+      room = proc { @reservation_manager.reserve_room("two", "2018-04-05", "2018-04-10") }
+      room.must_raise
+
+      room = proc { @reservation_manager.reserve_room([], "2018-04-05", "2018-04-10") }
+      room.must_raise
+
+      room = proc { @reservation_manager.reserve_room({}, "2018-04-05", "2018-04-10") }
+      room.must_raise
+
+    end
+
+    it "returns the instance of Reservation" do
+    end
+
+    it "pushes the created reservation to the array corresponding to the room number in the rooms_and_reservations hash" do
+    end
+
+  end # reserve_room
+
 end # describe ReservationManager
