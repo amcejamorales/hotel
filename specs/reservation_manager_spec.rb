@@ -35,4 +35,23 @@ describe Hotel::ReservationManager do
     end
   end # rooms_and_reservations
 
+  describe "#view_rooms" do
+    before do
+      @rooms = @reservation_manager.view_rooms
+    end
+    it "returns an array" do
+      @rooms.must_be_instance_of Array
+    end
+
+    it "returns an array of length 20, showing the room numbers from 1 to 20" do
+      array_to_twenty = (1..20).map do |number|
+        number
+      end
+
+      @rooms.size.must_equal 20
+
+      @rooms.must_equal array_to_twenty
+    end
+  end # view_rooms
+
 end # describe ReservationManager
