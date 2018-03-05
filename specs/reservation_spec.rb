@@ -18,6 +18,9 @@ describe Hotel::Reservation do
     end
 
     it "returns an error for an invalid date range" do
+      reservation_two = proc { Hotel::Reservation.new('2018-04-10', '2018-04-05') }
+
+      reservation_two.must_raise
     end
 
   end # describe initialize
