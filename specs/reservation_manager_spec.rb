@@ -56,28 +56,19 @@ describe Hotel::ReservationManager do
 
   describe "#reserve_room" do
     before do
-      @room = @reservation_manager.reserve_room(1, "2018-04-05", "2018-04-10")
+      @reservation = @reservation_manager.reserve_room(1, "2018-04-05", "2018-04-10")
     end
 
-    it "verifies the room number entered is valid" do
-      room = proc { @reservation_manager.reserve_room(21, "2018-04-05", "2018-04-10") }
-      room.must_raise
+    it "returns the instance of Reservation created" do
+      room_number = 1
+      start_date = Date.parse('2018-04-05')
+      end_date = Date.parse('2018-04-10')
 
-      room = proc { @reservation_manager.reserve_room(0, "2018-04-05", "2018-04-10") }
-      room.must_raise
+      @reservation.must_be_instance_of Hotel::Reservation
 
-      room = proc { @reservation_manager.reserve_room("two", "2018-04-05", "2018-04-10") }
-      room.must_raise
-
-      room = proc { @reservation_manager.reserve_room([], "2018-04-05", "2018-04-10") }
-      room.must_raise
-
-      room = proc { @reservation_manager.reserve_room({}, "2018-04-05", "2018-04-10") }
-      room.must_raise
-
-    end
-
-    it "returns the instance of Reservation" do
+      @reservation.room_number.must_equal room_number
+      @reservation.start_date.must_equal start_date
+      @reservation.end_date.must_equal end_date
     end
 
     it "pushes the created reservation to the array corresponding to the room number in the rooms_and_reservations hash" do

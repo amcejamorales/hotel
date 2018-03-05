@@ -3,10 +3,11 @@ module Hotel
 
     COST_PER_NIGHT = 200.00
 
-    attr_reader :room_number
+    attr_reader :room_number, :start_date, :end_date
 
-    def initialize(start_date, end_date)
-      @room_number = rand(21)
+    def initialize(room_number, start_date, end_date)
+      check_room_num(room_number)
+      @room_number = room_number
       @start_date = Date.parse(start_date)
       @end_date = Date.parse(end_date)
 
@@ -22,6 +23,15 @@ module Hotel
 
     def total_cost
       reservation_length * COST_PER_NIGHT
+    end
+
+    def check_room_num(room_num)
+      if !/^\d+$/.match(room_num.to_s)
+        raise ArgumentError.new("Invalid room number input. Please enter a number from 1 to 20.")
+      end
+      if !(1..20).include?(room_num)
+        raise ArgumentError.new("Invalid room number input. Room #{room_num} does not exist.")
+      end
     end
 
   end # class Reservation

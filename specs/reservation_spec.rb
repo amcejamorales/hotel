@@ -4,7 +4,7 @@ describe Hotel::Reservation do
 
   before do
     COST_PER_NIGHT = 200.00
-    @reservation_one = Hotel::Reservation.new("2018-04-05", "2018-04-10")
+    @reservation_one = Hotel::Reservation.new(1, "2018-04-05", "2018-04-10")
   end
 
   describe "#initialize" do
@@ -19,7 +19,7 @@ describe Hotel::Reservation do
     end
 
     it "returns an error for an invalid date range" do
-      reservation_two = proc { Hotel::Reservation.new("2018-04-10", "2018-04-05") }
+      reservation_two = proc {  Hotel::Reservation.new(1, "2018-04-10", "2018-04-05") }
 
       reservation_two.must_raise
     end
@@ -41,7 +41,7 @@ describe Hotel::Reservation do
     end
 
     it "returns 1 for a two-day, one-night reservation" do
-      reservation_three = Hotel::Reservation.new("2018-04-05", "2018-04-06")
+      reservation_three = Hotel::Reservation.new(1, "2018-04-05", "2018-04-06")
       num_nights = (Date.parse("2018-04-06") - Date.parse("2018-04-05")).to_i
       num_nights.must_equal 1
 
@@ -54,7 +54,7 @@ describe Hotel::Reservation do
       skip
     end
 
-  end
+  end # describe reservation_length
 
   describe "#total_cost" do
     before do
@@ -73,5 +73,19 @@ describe Hotel::Reservation do
       @total_cost.must_equal estimated_cost
     end
   end # describe #total_cost
+
+  describe "#check_room_num" do
+    it "verifies the room number entered is valid" do
+      proc { Hotel::Reservation.new(21, "2018-04-05", "2018-04-10") }.must_raise
+
+      proc { Hotel::Reservation.new(0, "2018-04-05", "2018-04-10") }.must_raise
+
+      proc { Hotel::Reservation.new("two", "2018-04-05", "2018-04-10") }.must_raise
+
+      proc { Hotel::Reservation.new([], "2018-04-05", "2018-04-10") }.must_raise
+
+      proc { Hotel::Reservation.new({}, "2018-04-05", "2018-04-10") }.must_raise
+    end
+  end # describe check_room_num
 
 end # describe Reservation
