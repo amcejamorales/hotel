@@ -1,8 +1,8 @@
 require_relative 'spec_helper'
+require 'pry'
 
 describe Hotel::ReservationManager do
   before do
-    # COST_PER_NIGHT = 200.00
     @reservation_manager = Hotel::ReservationManager.new
   end
 
@@ -162,5 +162,56 @@ describe Hotel::ReservationManager do
 
     end # describe reservations_on after reservations are made
   end # describe reservations_on
+
+  describe "#view_available" do
+    before do
+      @available_rooms = @reservation_manager.view_available('2018-04-05', '2018-04-10')
+    end
+
+    it "returns an array" do
+      @available_rooms.must_be_instance_of Array
+    end
+
+    it "returns an array of size 20 if no reservations have been made" do
+      @available_rooms.length.must_equal 20
+    end
+
+    it "returns an empty array if all rooms are booked for the date range provided" do
+      (1..20).each do |room|
+        @reservation_manager.reserve_room(room, "2018-04-05", "2018-04-10")
+      end
+      result = @reservation_manager.view_available("2018-04-05", "2018-04-10")
+      result.must_be_instance_of Array
+      result.must_be_empty
+      result = @reservation_manager.view_available("2018-04-01", "2018-04-06")
+      result.must_be_instance_of Array
+      result.must_be_empty
+      result = @reservation_manager.view_available("2018-04-07", "2018-04-12")
+      result.must_be_instance_of Array
+      result.must_be_empty
+    end
+
+    it "returns an array of numbers" do
+      @reservation_manager.reserve_room(1,"2018-04-05", "2018-04-10")
+      available_rooms = @reservation_manager.view_available("2018-04-05", "2018-04-10")
+      available_rooms.each do |room|
+        room.must_be_instance_of Integer
+      end
+    end
+
+    it "only includes the reservations which do not overlap with the date range provided" do
+      available_rooms = (4..20).to_a
+
+      @reservation_manager.reserve_room(1, "2018-04-03", "2018-04-08")
+      @reservation_manager.reserve_room(2, "2018-04-04", "2018-04-09")
+      @reservation_manager.reserve_room(3, "2018-04-05", "2018-04-10")
+      @reservation_manager.reserve_room(4, "2018-04-06", "2018-04-11")
+      @reservation_manager.reserve_room(5, "2018-04-07", "2018-04-12")
+
+      result = @reservation_manager.view_available("2018-04-02", "2018-04-05")
+
+      result.must_equal available_rooms
+    end
+  end # describe view_available
 
 end # describe ReservationManager

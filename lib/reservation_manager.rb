@@ -1,4 +1,5 @@
 require_relative 'reservation'
+require 'pry'
 
 module Hotel
   class ReservationManager
@@ -40,6 +41,32 @@ module Hotel
       end
       reservations_on_date
     end # reservations_on
+
+    def view_available(start_date, end_date)
+      room_reservations = []
+      date_range = (start_date..end_date)
+
+      @rooms_and_reservations.each do |room, reservations|
+        reservations.each do  |reservation|
+          overlap = false
+          room_date_range = (reservation.start_date..reservation.end_date)
+          date_range.each do |date|
+            if room_date_range.include?(Date.parse(date))
+              overlap = true
+            end
+          end
+          room_reservations << room if overlap
+        end
+      end
+
+      available_rooms = view_rooms
+
+      available_rooms = available_rooms.select do |room|
+        !room_reservations.include?(room)
+      end
+
+      available_rooms
+    end # def view_available
 
   end # class ReservationManager
 end # module Hotel
