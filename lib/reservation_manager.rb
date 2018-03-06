@@ -27,5 +27,19 @@ module Hotel
       new_reservation
     end
 
+    def reservations_on(date_string)
+      date = Date.parse(date_string)
+      reservations_on_date = []
+      @rooms_and_reservations.each do |room, reservations|
+        reservations.each do  |reservation|
+          date_range = (reservation.start_date..reservation.end_date)
+          if date_range.include?(date)
+            reservations_on_date << reservation
+          end
+        end
+      end
+      reservations_on_date
+    end # reservations_on
+
   end # class ReservationManager
 end # module Hotel

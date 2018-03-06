@@ -29,8 +29,8 @@ describe Hotel::ReservationManager do
     end
 
     it "returns a hash for which every value is an empty array upon creation of ReservationManager" do
-      @rooms_and_reservations.each do |room, reservation|
-        reservation.must_equal []
+      @rooms_and_reservations.each do |room, reservations|
+        reservations.must_equal []
       end
     end
   end # rooms_and_reservations
@@ -88,9 +88,54 @@ describe Hotel::ReservationManager do
       room_one_reservation.must_be_instance_of Hotel::Reservation
       room_one_reservation.room_number.must_equal @room_number
       room_one_reservation.start_date.must_equal @start_date
-      room_one_reservation.end_date.must_equal @end_date 
+      room_one_reservation.end_date.must_equal @end_date
     end
 
   end # reserve_room
+
+  describe "#reservations_on" do
+    it "returns an array" do
+      reservations = @reservation_manager.reservations_on("2018-04-06")
+      reservations.must_be_instance_of Array
+    end
+
+    it "returns an empty array if no reservations have been made" do
+      reservations = @reservation_manager.reservations_on("2018-04-06")
+      reservations.must_equal []
+    end
+
+    describe "#reservations_on accounst for completed reservations" do
+
+      before do
+        @reservation_manager.reserve_room(1, "2018-04-05", "2018-04-10")
+        @reservation_manager.reserve_room(1, "2018-04-05", "2018-04-06")
+        @reservations_on = @reservation_manager.reservations_on("2018-04-06")
+        @date = Date.parse("2018-04-06")
+      end
+
+      it "the size of the array returned is equal to the number of reservations whose date ranges include the argument passed in" do
+        @reservations_on.length.must_equal 2
+      end
+
+      it "each item in the array is an instance of Reservation" do
+        @reservations_on.each do |reservation|
+          reservation.must_be_instance_of Hotel::Reservation
+        end
+      end
+
+      it "each reservation in the array has a date range that includes the argument passed in" do
+        @reservations_on.each do |reservation|
+          (reservation.start_date..reservation.end_date).must_include @date
+        end
+      end
+
+      it "returns an empty array if no reservations include the argument passed in" do
+        reservations_on = @reservation_manager.reservations_on("2018-04-25")
+        reservations_on.must_equal []
+      end
+
+    end # describe reservations_on after reservations are made
+
+  end # describe reservations_on
 
 end # describe ReservationManager
