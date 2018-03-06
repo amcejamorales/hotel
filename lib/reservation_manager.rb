@@ -1,4 +1,5 @@
 require_relative 'reservation'
+require_relative 'block'
 require 'pry'
 require 'date'
 
