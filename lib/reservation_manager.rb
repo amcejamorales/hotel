@@ -1,5 +1,6 @@
 require_relative 'reservation'
 require 'pry'
+require 'date'
 
 module Hotel
   class ReservationManager
@@ -67,6 +68,16 @@ module Hotel
 
       available_rooms
     end # def view_available
+
+    def reserve_available(start_date, end_date)
+      available_rooms = view_available(start_date, end_date)
+      first_available = available_rooms.first
+
+      new_reservation = Hotel::Reservation.new(first_available, start_date, end_date)
+
+      @rooms_and_reservations[first_available] << new_reservation
+      new_reservation
+    end
 
   end # class ReservationManager
 end # module Hotel

@@ -3,6 +3,7 @@ require 'pry'
 
 describe Hotel::ReservationManager do
   before do
+    COST_PER_NIGHT = 200.00
     @reservation_manager = Hotel::ReservationManager.new
   end
 
@@ -165,7 +166,7 @@ describe Hotel::ReservationManager do
 
   describe "#view_available" do
     before do
-      @available_rooms = @reservation_manager.view_available('2018-04-05', '2018-04-10')
+      @available_rooms = @reservation_manager.view_available("2018-04-05", "2018-04-10")
     end
 
     it "returns an array" do
@@ -211,7 +212,67 @@ describe Hotel::ReservationManager do
       result = @reservation_manager.view_available("2018-04-02", "2018-04-05")
 
       result.must_equal available_rooms
+
+      available_rooms = (1..3).to_a + (6..20).to_a
+      result = @reservation_manager.view_available("2018-04-11", "2018-04-12")
+      result.must_equal available_rooms
     end
   end # describe view_available
+
+  describe "#reserve_available" do
+    before do
+      @reservation_manager.reserve_room(1, "2018-04-03", "2018-04-08")
+      @reservation_manager.reserve_room(2, "2018-04-04", "2018-04-09")
+      @reservation_manager.reserve_room(3, "2018-04-05", "2018-04-10")
+      @reservation_manager.reserve_room(4, "2018-04-06", "2018-04-11")
+      @reservation_manager.reserve_room(5, "2018-04-07", "2018-04-12")
+
+      @available_rooms = @reservation_manager.view_available("2018-04-11", "2018-04-12")
+
+      @result = @reservation_manager.reserve_available("2018-04-11", "2018-04-12")
+    end
+
+    it "returns the reservation created for the given date range" do
+      first_available = @available_rooms[0]
+      first_available.must_equal 1
+
+      @result.must_be_instance_of Hotel::Reservation
+      @result.room_number.must_equal first_available
+    end
+
+    it "selects the first available room for the given date range" do
+      next_available = @available_rooms[1]
+
+      next_available.must_equal 2
+
+      result = @reservation_manager.reserve_available("2018-04-11", "2018-04-12")
+      result.room_number.must_equal next_available
+
+      next_available = @available_rooms[2]
+
+      next_available.must_equal 3
+
+      result = @reservation_manager.reserve_available("2018-04-11", "2018-04-12")
+      result.room_number.must_equal next_available
+
+      next_available = @available_rooms[3]
+
+      next_available.must_equal 6
+
+      result = @reservation_manager.reserve_available("2018-04-11", "2018-04-12")
+      result.room_number.must_equal next_available
+      skip
+    end
+
+    it "pushes the created reservation to the array corresponding to the first available room number in the rooms_and_reservations hash" do
+      @available_rooms.first.must_equal 1
+
+      rooms_and_reservations = @reservation_manager.rooms_and_reservations
+
+      first_room_reservations = rooms_and_reservations[1]
+
+      first_room_reservations.must_include @result
+    end
+  end # describe reserve_available
 
 end # describe ReservationManager
