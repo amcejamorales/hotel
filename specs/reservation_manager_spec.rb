@@ -2,6 +2,7 @@ require_relative 'spec_helper'
 
 describe Hotel::ReservationManager do
   before do
+    # COST_PER_NIGHT = 200.00
     @reservation_manager = Hotel::ReservationManager.new
   end
 
@@ -89,6 +90,14 @@ describe Hotel::ReservationManager do
       room_one_reservation.room_number.must_equal @room_number
       room_one_reservation.start_date.must_equal @start_date
       room_one_reservation.end_date.must_equal @end_date
+    end
+
+    it "allows you to get the total cost of a reservation" do
+      num_nights = @end_date - @start_date
+      total_cost = num_nights * COST_PER_NIGHT
+      reservation = @reservation_manager.reserve_room(1, "2018-04-05", "2018-04-10")
+      result = reservation.total_cost
+      result.must_equal total_cost 
     end
 
   end # reserve_room
