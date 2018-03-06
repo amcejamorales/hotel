@@ -97,7 +97,24 @@ describe Hotel::ReservationManager do
       total_cost = num_nights * COST_PER_NIGHT
       reservation = @reservation_manager.reserve_room(1, "2018-04-05", "2018-04-10")
       result = reservation.total_cost
-      result.must_equal total_cost 
+      result.must_equal total_cost
+    end
+
+    it "lets you make overlapping reservations on the same room" do
+      reservation_one = @reservation_manager.reserve_room(1, "2018-04-05", "2018-04-10")
+      reservation_two = @reservation_manager.reserve_room(1, "2018-04-08", "2018-04-12")
+
+      reservation_one.must_be_instance_of Hotel::Reservation
+      reservation_two.must_be_instance_of Hotel::Reservation
+      date_range_one = (reservation_one.start_date..reservation_one.end_date)
+      date_range_two = (reservation_two.start_date..reservation_two.end_date)
+
+      overlapping_dates = date_range_one.select do |date|
+        date_range_two.include?(date)
+      end
+
+      overlapping_dates.wont_be_empty
+
     end
 
   end # reserve_room
@@ -144,7 +161,6 @@ describe Hotel::ReservationManager do
       end
 
     end # describe reservations_on after reservations are made
-
   end # describe reservations_on
 
 end # describe ReservationManager
