@@ -6,10 +6,11 @@ require 'date'
 module Hotel
   class ReservationManager
 
-    attr_reader :rooms_and_reservations
+    attr_reader :rooms_and_reservations, :blocks
 
     def initialize
       @rooms_and_reservations = generate_rooms
+      @blocks = []
     end # initialize
 
     def generate_rooms
@@ -79,6 +80,20 @@ module Hotel
       @rooms_and_reservations[first_available] << new_reservation
       new_reservation
     end
+
+    def generate_block(num_rooms, start_date, end_date, discount_rate)
+      block = Hotel::Block.new(num_rooms, start_date, end_date, discount_rate)
+
+      available_rooms = view_available(start_date, end_date)
+
+      available_rooms[0...num_rooms].each do |room|
+        block.rooms << room
+      end
+
+      @blocks << block
+
+      block
+    end # generate_block
 
   end # class ReservationManager
 end # module Hotel

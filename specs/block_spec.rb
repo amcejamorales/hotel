@@ -2,6 +2,10 @@ require_relative 'spec_helper'
 
 describe Hotel::Block do
 
+  before do
+    @reservation_manager = Hotel::ReservationManager.new
+  end
+
   describe "#initialize" do
     it "can be created" do
       block = Hotel::Block.new(5, "2018-05-05", "2018-05-10", 150.00)

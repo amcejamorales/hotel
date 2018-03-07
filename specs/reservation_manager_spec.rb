@@ -275,4 +275,40 @@ describe Hotel::ReservationManager do
     end
   end # describe reserve_available
 
+  describe "#generate_block" do
+    before do
+      @result = @reservation_manager.generate_block(5, "2018-05-05", "2018-05-10", 150.00)
+    end
+
+    it "returns an instance of block" do
+      @result.must_be_instance_of Hotel::Block
+    end
+
+    it "pushes the first available rooms into the block's rooms array, as many as were requested" do
+      @reservation_manager.reserve_available("2018-05-05", "2018-05-10")
+      available = @reservation_manager.view_available("2018-05-05", "2018-05-10")
+      first_five_available = available[0...5]
+      first_five_available.must_equal [2, 3, 4, 5, 6]
+      result = @reservation_manager.generate_block(5, "2018-05-05", "2018-05-10", 150.00)
+      result.rooms.must_equal first_five_available
+    end
+
+    it "pushes the newly created block to the reservation manager's list of blocks" do
+      reservation_manager = Hotel::ReservationManager.new
+      reservation_manager.reserve_available("2018-05-05", "2018-05-10")
+      reservation_manager.blocks.must_be_empty
+
+      result = reservation_manager.generate_block(5, "2018-05-05", "2018-05-10", 150.00)
+
+      reservation_manager.blocks.size.must_equal 1
+
+      reservation_manager.blocks.each do |block|
+        block.must_be_instance_of Hotel::Block
+      end
+    end
+
+    it "raises an error if there aren't enough available rooms for the number requested" do
+    end
+  end
+
 end # describe ReservationManager
