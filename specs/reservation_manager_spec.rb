@@ -308,6 +308,20 @@ describe Hotel::ReservationManager do
     end
 
     it "raises an error if there aren't enough available rooms for the number requested" do
+      (1..18).each do |room|
+        @reservation_manager.reserve_room(room, "2018-06-05", "2018-06-10")
+      end
+      NUM_BLOCKS = 1
+      blocks_before = @reservation_manager.blocks
+      blocks_before.size.must_equal NUM_BLOCKS
+
+      block = proc { @reservation_manager.generate_block(3, "2018-06-05", "2018-06-10", 150.00) }
+
+      block.must_raise StandardError
+
+      blocks_after = @reservation_manager.blocks
+      blocks_after.size.must_equal NUM_BLOCKS
+
     end
   end
 

@@ -86,6 +86,10 @@ module Hotel
 
       available_rooms = view_available(start_date, end_date)
 
+      if num_rooms > available_rooms.length
+        raise StandardError.new("There aren't enough rooms to create a block between #{start_date} and #{end_date}.")
+      end
+
       available_rooms[0...num_rooms].each do |room|
         block.rooms << room
       end
