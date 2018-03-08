@@ -24,4 +24,14 @@ module Hotel
   def self.parse_date(date_string)
     Date.parse(date_string)
   end # parse_date
+
+  def self.valid_date_range(start_string, end_string)
+    start_date = parse_date(start_string)
+    end_date = parse_date(end_string)
+
+    if end_date < start_date
+      raise ArgumentError.new("Invalid date range. End date comes before start date.")
+    end
+    true
+  end # valid_date_range
 end

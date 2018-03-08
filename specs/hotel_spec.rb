@@ -8,10 +8,23 @@ describe Hotel do
       @first_end_date = "2018-01-10"
     end
 
-    describe "no overlap" do
+    it "returns a Boolean" do
+      second_start_date = "2018-02-05"
+      second_end_date = "2018-02-10"
+      result = Hotel::overlap?(@first_start_date, @first_end_date, second_start_date, second_end_date)
 
-      it "returns a Boolean" do
-      end
+      result.must_be_instance_of FalseClass
+
+      second_start_date = "2018-01-05"
+      second_end_date = "2018-01-10"
+
+      result = Hotel::overlap?(@first_start_date, @first_end_date, second_start_date, second_end_date)
+
+      result.must_be_instance_of TrueClass
+
+    end
+
+    describe "no overlap" do
 
       it "returns false if the first date range comes completely before the second" do
         second_start_date = "2018-02-05"
@@ -125,4 +138,25 @@ describe Hotel do
       @parsed_date.must_equal date
     end
   end # describe parse_date
+
+  describe "#valid_date_range" do
+    it "returns true if the date range is valid" do
+      start_date = "2018-01-05"
+      end_date = "2018-01-10"
+      result = Hotel::valid_date_range(start_date, end_date)
+      result.must_equal true
+
+      start_date = "2018-01-10"
+      end_date = "2018-01-10"
+      result = Hotel::valid_date_range(start_date, end_date)
+      result.must_equal true
+    end
+
+    it "raises an error if the end_date comes before the start_date" do
+      start_date = "2018-01-10"
+      end_date = "2018-01-05"
+      result = proc { Hotel::valid_date_range(start_date, end_date) }
+      result.must_raise ArgumentError
+    end
+  end # describe valid_date_range
 end # describe Hotel module
