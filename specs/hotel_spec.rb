@@ -53,6 +53,38 @@ describe Hotel do
         result = Hotel::overlap?(@first_start_date, @first_end_date, second_start_date, second_end_date)
         result.must_equal false
       end
+
+      it "returns false if the first start date and end date are the same and come before the second date range" do
+        date = "2018-01-05"
+        second_start_date = "2018-01-10"
+        second_end_date = "2018-01-15"
+        result = Hotel::overlap?(date, date, second_start_date, second_end_date)
+        result.must_equal false
+      end
+
+      it "returns false if the first start date and end date are the same and come after the second date range" do
+        date = "2018-01-20"
+        second_start_date = "2018-01-10"
+        second_end_date = "2018-01-15"
+        result = Hotel::overlap?(date, date, second_start_date, second_end_date)
+        result.must_equal false
+      end
+
+      it "returns false if the second start date and end date are the same and come before the first date range" do
+        date = "2018-01-05"
+        first_start_date = "2018-01-10"
+        first_end_date = "2018-01-15"
+        result = Hotel::overlap?(first_start_date, first_end_date, date, date)
+        result.must_equal false
+      end
+
+      it "returns false if the second start date and end date are the same and come after the first date range" do
+        date = "2018-01-20"
+        first_start_date = "2018-01-10"
+        first_end_date = "2018-01-15"
+        result = Hotel::overlap?(first_start_date, first_end_date, date, date)
+        result.must_equal false
+      end
     end # describe no overlap
 
     describe "actual overlap" do
@@ -117,6 +149,40 @@ describe Hotel do
         second_start_date = "2018-01-05"
         second_end_date = "2018-01-11"
         result = Hotel::overlap?(@first_start_date, @first_end_date, second_start_date, second_end_date)
+        result.must_equal true
+      end
+
+      it "returns true if the first start date and end date are the same date and between the second start and end dates" do
+        second_start_date = "2018-01-07"
+        second_end_date = "2018-01-07"
+        result = Hotel::overlap?(second_start_date, second_end_date, @first_start_date, @first_end_date)
+        result.must_equal true
+      end
+
+      it "returns true if the second start date and end date are the same date and between the first start and end dates" do
+        second_start_date = "2018-01-07"
+        second_end_date = "2018-01-07"
+        result = Hotel::overlap?(@first_start_date, @first_end_date, second_start_date, second_end_date)
+        result.must_equal true
+      end
+
+      it "returns true if the first start date and end date are both the same as the second start date" do
+        date = "2018-01-05"
+        second_end_date = "2018-01-07"
+        result = Hotel::overlap?(date, date, date, second_end_date)
+        result.must_equal true
+      end
+
+      it "returns true if the second start date and end date are both the same as the first start date" do
+        date = "2018-01-05"
+        first_end_date = "2018-01-07"
+        result = Hotel::overlap?(date, first_end_date, date, date)
+        result.must_equal true
+      end
+
+      it "returns true if all dates entered are the same" do
+        date = "2018-01-05"
+        result = Hotel::overlap?(date, date, date, date)
         result.must_equal true
       end
 
