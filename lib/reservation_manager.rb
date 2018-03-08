@@ -48,20 +48,19 @@ module Hotel
     end # reservations_on
 
     def view_available(start_date, end_date)
-      room_reservations = []
+      unavailable = []
 
       @rooms_and_reservations.each do |room, reservations|
         reservations.each do  |reservation|
           overlap = Hotel::overlap?(start_date, end_date, reservation.start_date, reservation.end_date)
-          room_reservations << room if overlap
-          available_rooms << room if !overlap
+          unavailable << room if overlap
         end
       end
 
       available_rooms = view_rooms
 
       available_rooms = available_rooms.select do |room|
-        !room_reservations.include?(room)
+        !unavailable.include?(room)
       end
 
       available_rooms
@@ -94,6 +93,15 @@ module Hotel
 
       block
     end # generate_block
+
+    def in_block?(room_num, start_date, end_date)
+      in_block = false
+      @blocks.each do |block|
+        overlap = Hotel::overlap?(start_date, end_date, block.start_date, block.end_date)
+        in_block = true if overlap
+      end
+      in_block
+    end # in_block?
 
   end # class ReservationManager
 end # module Hotel

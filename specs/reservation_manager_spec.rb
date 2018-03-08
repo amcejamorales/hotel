@@ -217,6 +217,7 @@ describe Hotel::ReservationManager do
       result = @reservation_manager.view_available("2018-04-10", "2018-04-12")
       result.must_equal available_rooms
     end
+
   end # describe view_available
 
   describe "#reserve_available" do
@@ -328,5 +329,30 @@ describe Hotel::ReservationManager do
 
     end
   end
+
+  describe "#in_block?" do
+
+    before do
+      @reservation_manager.generate_block(5, "2018-04-04", "2018-04-11", 150.00)
+    end
+
+    it "returns a Boolean" do
+      result = @reservation_manager.in_block?(1, "2018-03-05", "2018-03-10")
+      result.must_be_instance_of FalseClass
+
+      result = @reservation_manager.in_block?(1, "2018-04-05", "2018-04-10")
+      result.must_be_instance_of TrueClass
+    end
+
+    it "returns true if a given room is in a block for a given date range" do
+      result = @reservation_manager.in_block?(1, "2018-03-05", "2018-03-10")
+      result.must_equal false
+    end
+
+    it "returns false if a given room is not in a block for a given date range" do
+      result = @reservation_manager.in_block?(1, "2018-04-05", "2018-04-10")
+      result.must_equal true
+    end
+  end # describe in_block?
 
 end # describe ReservationManager
