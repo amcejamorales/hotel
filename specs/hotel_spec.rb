@@ -180,6 +180,20 @@ describe Hotel do
         result.must_equal true
       end
 
+      it "returns true if the first start date and end date are the same as the second end date" do
+        date = "2018-04-06"
+        second_start_date = "2018-04-05"
+        result = Hotel::overlap?(date, date, second_start_date, date)
+        result.must_equal true
+      end
+
+      it "returns true if the second start date and end date are the same as the first end date" do
+        date = "2018-04-06"
+        first_start_date = "2018-04-05"
+        result = Hotel::overlap?(first_start_date, date, date, date)
+        result.must_equal true
+      end
+
       it "returns true if all dates entered are the same" do
         date = "2018-01-05"
         result = Hotel::overlap?(date, date, date, date)
