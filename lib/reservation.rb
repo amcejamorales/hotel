@@ -8,12 +8,10 @@ module Hotel
     def initialize(room_number, start_date, end_date)
       check_room_num(room_number)
       @room_number = room_number
-      @start_date = Date.parse(start_date)
-      @end_date = Date.parse(end_date)
+      @start_date = Hotel::parse_date(start_date)
+      @end_date = Hotel::parse_date(end_date)
 
-      if @start_date > @end_date
-        raise StandardError.new("Invalid date range. Start date is after end date.")
-      end
+      Hotel::valid_date_range(start_date, end_date)
     end
 
     def reservation_length

@@ -19,25 +19,27 @@ module Hotel
         rooms_and_reservations[room + 1] = Array.new()
       end
       rooms_and_reservations
-    end
+    end # generate_rooms
 
     def view_rooms
       rooms = @rooms_and_reservations.keys
-    end
+    end # view_rooms
 
     def reserve_room(room_num, start_date, end_date)
+      Hotel::valid_date_range(start_date, end_date)
       new_reservation = Reservation.new(room_num, start_date, end_date)
       @rooms_and_reservations[room_num] << new_reservation
       new_reservation
-    end
+    end # reserve_room
 
     def reservations_on(date_string)
-      date = Date.parse(date_string)
+      date = Hotel::parse_date(date_string)
       reservations_on_date = []
       @rooms_and_reservations.each do |room, reservations|
         reservations.each do  |reservation|
-          date_range = (reservation.start_date..reservation.end_date)
-          if date_range.include?(date)
+          overlap = Hotel::overlap?(date, date, reservation.start_date, reservation.end_date)
+
+          if overlap
             reservations_on_date << reservation
           end
         end
@@ -47,18 +49,12 @@ module Hotel
 
     def view_available(start_date, end_date)
       room_reservations = []
-      date_range = (start_date..end_date)
 
       @rooms_and_reservations.each do |room, reservations|
         reservations.each do  |reservation|
-          overlap = false
-          room_date_range = (reservation.start_date..reservation.end_date)
-          date_range.each do |date|
-            if room_date_range.include?(Date.parse(date))
-              overlap = true
-            end
-          end
+          overlap = Hotel::overlap?(start_date, end_date, reservation.start_date, reservation.end_date)
           room_reservations << room if overlap
+          available_rooms << room if !overlap
         end
       end
 
