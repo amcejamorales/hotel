@@ -383,6 +383,11 @@ describe Hotel::ReservationManager do
 
     # raise error if block does not exist
 
+    it "returns an instance of  Reservation" do
+      reservation = @reservation_manager.reserve_in_block(@block_id)
+      reservation.must_be_instance_of Hotel::Reservation
+    end
+
     it "makes a reservation within a block" do
       reservations_before = @reservation_manager.rooms_and_reservations[@block_room_one_reservations]
 
@@ -408,6 +413,19 @@ describe Hotel::ReservationManager do
       second_reservation.start_date.must_equal start_date
       second_reservation.end_date.must_equal end_date
       second_reservation.rate.must_equal discount_rate
+    end
+
+    it "properly assigns information from the block to the reservation" do
+      num_nights = @block.end_date - @block.start_date
+      total_cost = num_nights * @block.discount_rate
+
+      reservation = @reservation_manager.reserve_in_block(@block_id)
+
+      reservation.room_number.must_equal @block.rooms[0]
+      reservation.start_date.must_equal @block.start_date
+      reservation.end_date.must_equal @block.end_date
+      reservation.rate.must_equal @block.discount_rate
+      reservation.total_cost.must_equal total_cost
     end
   end # describe reserve_in_block
 
