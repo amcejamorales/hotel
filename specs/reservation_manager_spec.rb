@@ -240,15 +240,11 @@ describe Hotel::ReservationManager do
       @result = @reservation_manager.reserve_available("2018-04-10", "2018-04-12")
     end
 
-    it "cannot reserve rooms inside of a block for the given date range" do
-      available_rooms = (2..3).to_a + (6..20).to_a
-      first_five_available_for_block = available_rooms[0..5]
-
-      @reservation_manager.generate_block(5, "2018-04-10", "2018-04-12", 150.00)
-
-      available_for_general_public = available_rooms[5..-1]
-      public_reservation = @reservation_manager.reserve_available("2018-04-10", "2018-04-12")
-      public_reservation.room_number.must_equal available_for_general_public[0]
+    it "raises an error if no rooms are available" do
+      15.times do @reservation_manager.reserve_available("2018-04-03", "2018-04-12")
+      end
+      result = proc { @reservation_manager.reserve_available("2018-04-03", "2018-04-12") }
+      result.must_raise StandardError
     end
 
     it "returns the reservation created for the given date range" do
@@ -291,6 +287,18 @@ describe Hotel::ReservationManager do
 
       first_room_reservations.must_include @result
     end
+
+    it "cannot reserve rooms inside of a block for the given date range" do
+      available_rooms = (2..3).to_a + (6..20).to_a
+      first_five_available_for_block = available_rooms[0..5]
+
+      @reservation_manager.generate_block(5, "2018-04-10", "2018-04-12", 150.00)
+
+      available_for_general_public = available_rooms[5..-1]
+      public_reservation = @reservation_manager.reserve_available("2018-04-10", "2018-04-12")
+      public_reservation.room_number.must_equal available_for_general_public[0]
+    end
+
   end # describe reserve_available
 
   describe "#generate_block" do
@@ -381,8 +389,6 @@ describe Hotel::ReservationManager do
       @block_room_one_reservations = @block.rooms[0]
     end
 
-    # raise error if block does not exist
-
     it "returns an instance of  Reservation" do
       reservation = @reservation_manager.reserve_in_block(@block_id)
       reservation.must_be_instance_of Hotel::Reservation
@@ -413,6 +419,15 @@ describe Hotel::ReservationManager do
       second_reservation.start_date.must_equal start_date
       second_reservation.end_date.must_equal end_date
       second_reservation.rate.must_equal discount_rate
+    end
+
+    it "raises an error if there are no more available rooms in a block" do
+      5.times do
+        @reservation_manager.reserve_in_block(@block_id)
+      end
+      result = proc { @reservation_manager.reserve_in_block(@block_id) }
+
+      result.must_raise StandardError
     end
 
     it "properly assigns information from the block to the reservation" do
@@ -502,6 +517,13 @@ describe Hotel::ReservationManager do
       @block.end_date.must_equal end_date
       @block.discount_rate.must_equal discount_rate
     end
+
+    it "raises an error if the block does not exist" do
+      nonexistent_block_id = 5
+      result = proc { @reservation_manager.find_block(nonexistent_block_id) }
+      result.must_raise ArgumentError
+    end
+
   end # describe #find_block
 
 end # describe ReservationManager

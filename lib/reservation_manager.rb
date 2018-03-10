@@ -68,8 +68,12 @@ module Hotel
     end # def view_available
 
     def reserve_available(start_date, end_date)
-      # what if no rooms are available
       available_rooms = view_available(start_date, end_date)
+
+      if available_rooms.empty?
+        raise StandardError.new("There are no rooms available between #{start_date} and #{end_date}")
+      end
+
       first_available = available_rooms.first
 
       new_reservation = reserve_room(first_available, start_date, end_date)
@@ -113,7 +117,9 @@ module Hotel
       block = find_block(block_id)
       available = available_in_block(block_id)
 
-      # raise an error if no more rooms are available in block
+      if available.empty?
+        raise StandardError.new("There are no more rooms available in block #{block_id}.")
+      end
 
       reservation = reserve_room(available[0], block.start_date, block.end_date, block.discount_rate)
       reservation
@@ -140,6 +146,13 @@ module Hotel
     end # reserved
 
     def find_block(block_id)
+      block_ids = @blocks.map do |block|
+        block.id
+      end
+      if !block_ids.include?(block_id)
+        raise ArgumentError.new("Block #{block_id} does not exist.")
+      end
+      
       @blocks.select { |block| block.id == block_id }.first
     end # find_block
 
