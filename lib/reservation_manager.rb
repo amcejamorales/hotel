@@ -50,12 +50,10 @@ module Hotel
     def view_available(start_date, end_date)
       unavailable = []
 
-      @rooms_and_reservations.each do |room, reservations|
+      @rooms_and_reservations.each do |room , reservations|
         unavailable << room if in_block?(room, start_date, end_date)
-        reservations.each do  |reservation|
-          overlap = Hotel::overlap?(start_date, end_date, reservation.start_date, reservation.end_date)
-          unavailable << room if overlap
-        end
+        overlap = reserved?(room, start_date, end_date)
+        unavailable << room if overlap
       end
 
       available_rooms = view_rooms
@@ -152,7 +150,7 @@ module Hotel
       if !block_ids.include?(block_id)
         raise ArgumentError.new("Block #{block_id} does not exist.")
       end
-      
+
       @blocks.select { |block| block.id == block_id }.first
     end # find_block
 
