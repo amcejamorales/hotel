@@ -14,12 +14,26 @@ module Hotel
     end # initialize
 
     def generate_rooms
-      rooms_and_reservations = {}
-      20.times do |room|
-        rooms_and_reservations[room + 1] = Array.new()
+      rooms_and_reservations = []
+      (1..20).each do |room|
+        room_info = {
+          room_number: room,
+          rate: 200.00,
+          reservations: []
+        }
+        rooms_and_reservations << room_info
       end
       rooms_and_reservations
     end # generate_rooms
+
+    def set_room_rate(room_number, rate)
+      room = @rooms_and_reservations.select { |room_info|
+        room_info[:room_number] == room_number
+      }.first
+
+      room[:rate] = rate
+      rate
+    end # set_room_rate
 
     def view_rooms
       rooms = @rooms_and_reservations.keys
