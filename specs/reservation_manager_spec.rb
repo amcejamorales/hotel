@@ -218,6 +218,13 @@ describe Hotel::ReservationManager do
       result.must_equal available_rooms
     end
 
+    it "excludes any rooms in a block" do
+      @reservation_manager.generate_block(5, "2018-05-05", "2018-05-10", 150.00)
+      available_rooms = (6..20).to_a
+      result = @reservation_manager.view_available("2018-05-05", "2018-05-10")
+      result.must_equal available_rooms
+    end
+
   end # describe view_available
 
   describe "#reserve_available" do
@@ -233,9 +240,15 @@ describe Hotel::ReservationManager do
       @result = @reservation_manager.reserve_available("2018-04-10", "2018-04-12")
     end
 
-    it "test" do
-      available_rooms = (1..3).to_a + (6..20).to_a
-      @available_rooms.must_equal available_rooms
+    it "cannot reserve rooms inside of a block for the given date range" do
+      available_rooms = (2..3).to_a + (6..20).to_a
+      first_five_available_for_block = available_rooms[0..5]
+
+      @reservation_manager.generate_block(5, "2018-04-10", "2018-04-12", 150.00)
+
+      available_for_general_public = available_rooms[5..-1]
+      public_reservation = @reservation_manager.reserve_available("2018-04-10", "2018-04-12")
+      public_reservation.room_number.must_equal available_for_general_public[0]
     end
 
     it "returns the reservation created for the given date range" do
@@ -293,7 +306,7 @@ describe Hotel::ReservationManager do
       @reservation_manager.reserve_available("2018-05-05", "2018-05-10")
       available = @reservation_manager.view_available("2018-05-05", "2018-05-10")
       first_five_available = available[0...5]
-      first_five_available.must_equal [2, 3, 4, 5, 6]
+      first_five_available.must_equal [7, 8, 9, 10, 11]
       result = @reservation_manager.generate_block(5, "2018-05-05", "2018-05-10", 150.00)
       result.rooms.must_equal first_five_available
     end
@@ -326,9 +339,14 @@ describe Hotel::ReservationManager do
 
       blocks_after = @reservation_manager.blocks
       blocks_after.size.must_equal NUM_BLOCKS
-
     end
-  end
+
+    it "does not allow a room in one block to be included in a different block for a given date range" do
+      available_rooms = (6..20).to_a
+      new_block = @reservation_manager.generate_block(5, "2018-05-05", "2018-05-10", 150.00)
+      new_block.rooms.must_equal available_rooms[0...5]
+    end
+  end # describe #generate_block
 
   describe "#in_block?" do
 
@@ -354,5 +372,29 @@ describe Hotel::ReservationManager do
       result.must_equal true
     end
   end # describe in_block?
+
+  describe "#reserve_in_block" do
+    before do
+      @reservation_manager.generate_block(5, "2018-04-05", "2018-04-10", 150.00)
+    end
+
+    # raise error if block does not exist
+
+    it "makes a reservation within a block" do
+      block = @reservation_manager.blocks[0]
+      block.id.must_equal 1
+
+      reservations_before = @reservation_manager.rooms_and_reservations[block.rooms[0]]
+
+      reservations_before.length.must_equal 0
+
+      @reservation_manager.reserve_in_block(block.id)
+
+      reservations_after = @reservation_manager.rooms_and_reservations[block.rooms[0]]
+
+      reservations_after.length.must_equal 1
+
+    end
+  end # describe reserve_in_block
 
 end # describe ReservationManager

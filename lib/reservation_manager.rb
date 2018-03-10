@@ -51,6 +51,7 @@ module Hotel
       unavailable = []
 
       @rooms_and_reservations.each do |room, reservations|
+        unavailable << room if in_block?(room, start_date, end_date)
         reservations.each do  |reservation|
           overlap = Hotel::overlap?(start_date, end_date, reservation.start_date, reservation.end_date)
           unavailable << room if overlap
@@ -67,17 +68,16 @@ module Hotel
     end # def view_available
 
     def reserve_available(start_date, end_date)
+      # what if no rooms are available
       available_rooms = view_available(start_date, end_date)
       first_available = available_rooms.first
 
-      new_reservation = Hotel::Reservation.new(first_available, start_date, end_date)
-
-      @rooms_and_reservations[first_available] << new_reservation
-      new_reservation
+      new_reservation = reserve_room(first_available, start_date, end_date)
     end
 
     def generate_block(num_rooms, start_date, end_date, discount_rate)
-      block = Hotel::Block.new(num_rooms, start_date, end_date, discount_rate)
+      block_id = generate_block_id
+      block = Hotel::Block.new(block_id, num_rooms, start_date, end_date, discount_rate)
 
       available_rooms = view_available(start_date, end_date)
 
@@ -94,14 +94,28 @@ module Hotel
       block
     end # generate_block
 
+    def generate_block_id
+      @blocks.length + 1
+    end
+
     def in_block?(room_num, start_date, end_date)
       in_block = false
       @blocks.each do |block|
         overlap = Hotel::overlap?(start_date, end_date, block.start_date, block.end_date)
-        in_block = true if overlap
+        if overlap && block.rooms.include?(room_num)
+          in_block = true
+        end
       end
       in_block
     end # in_block?
+
+    def reserve_in_block(block_id)
+      block = @blocks.select { |block| block.id == block_id }.first
+
+      reservation = reserve_room(block.rooms[0], block.start_date, block.end_date)
+    end # reserve_in_block
+
+    
 
   end # class ReservationManager
 end # module Hotel
