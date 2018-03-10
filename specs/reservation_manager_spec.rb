@@ -397,4 +397,79 @@ describe Hotel::ReservationManager do
     end
   end # describe reserve_in_block
 
+  describe "#available_in_block" do
+    before do
+      @block_id = 1
+      @reservation_manager.generate_block(5, "2018-04-05", "2018-04-10", 150.00)
+      @reservation_manager.reserve_in_block(@block_id)
+      @result = @reservation_manager.available_in_block(@block_id)
+    end
+
+    it "returns an array of numbers" do
+      @result.must_be_instance_of Array
+      @result.each do |room|
+        room.must_be_instance_of Integer
+      end
+    end
+
+    it "returns only the rooms which haven't been reserved yet within a block" do
+      available_in_block = (2..5).to_a
+
+      @result.must_equal available_in_block
+    end
+  end # available_in_block
+
+  describe "#reserved?" do
+    before do
+      @reservation_manager.reserve_room(1, "2018-04-05", "2018-04-10")
+      @reservation_manager.reserve_room(1, "2018-06-05", "2018-06-10")
+      @reserved = @reservation_manager.reserved?(1, "2018-04-05", "2018-04-10")
+      @not_reserved = @reservation_manager.reserved?(1, "2018-05-05", "2018-05-10")
+    end
+
+    it "returns a Boolean" do
+      @reserved.must_be_instance_of TrueClass
+      result = @not_reserved.must_be_instance_of FalseClass
+    end
+
+    it "returns true if the room has a reservation for the date range provided" do
+      @reserved.must_equal true
+    end
+
+    it "returns false if the room does not have a reservation for the date range provided" do
+      @not_reserved.must_equal false
+    end
+
+    it "returns false if the room has no reservations" do
+      result = @reservation_manager.reserved?(2, "2018-04-05", "2018-04-10")
+    end
+  end # describe #reserved
+
+  describe "#find_block" do
+    before do
+      second_block_id = 2
+      @reservation_manager.generate_block(5, "2018-04-05", "2018-04-10", 150.00)
+      @reservation_manager.generate_block(3, "2018-05-05", "2018-05-10", 170.00)
+      @block = @reservation_manager.find_block(second_block_id)
+    end
+
+    it "returns an instance of Block" do
+      @block.must_be_instance_of Hotel::Block
+    end
+
+    it "returns the correct block" do
+      block_id = 2
+      available_rooms = (1..3).to_a
+      start_date = "2018-05-05"
+      end_date = "2018-05-10"
+      discount_rate = 170.00
+
+      @block.id.must_equal block_id
+      @block.rooms.must_equal available_rooms
+      @block.start_date.must_equal start_date
+      @block.end_date.must_equal end_date
+      @block.discount_rate.must_equal discount_rate
+    end
+  end # describe #find_block
+  
 end # describe ReservationManager

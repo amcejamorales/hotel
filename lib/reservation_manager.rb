@@ -110,12 +110,34 @@ module Hotel
     end # in_block?
 
     def reserve_in_block(block_id)
-      block = @blocks.select { |block| block.id == block_id }.first
+      block = find_block(block_id)
 
       reservation = reserve_room(block.rooms[0], block.start_date, block.end_date)
     end # reserve_in_block
 
-    
+    def available_in_block(block_id)
+      block = find_block(block_id)
+      available = []
+      block.rooms.each do |room|
+        reserved = reserved?(room, block.start_date, block.end_date)
+        available << room if !reserved
+      end
+      available
+    end # available_in_block
+
+    def reserved?(room_number, start_date, end_date)
+      room_reservations = @rooms_and_reservations[room_number]
+      overlap = false
+      room_reservations.each do |reservation|
+        overlap = Hotel::overlap?(start_date, end_date, reservation.start_date, reservation.end_date)
+        return overlap if overlap
+      end
+      overlap
+    end # reserved
+
+    def find_block(block_id)
+      @blocks.select { |block| block.id == block_id }.first
+    end # find_block
 
   end # class ReservationManager
 end # module Hotel
