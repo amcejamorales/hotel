@@ -1,17 +1,18 @@
 module Hotel
   class Reservation
 
-    COST_PER_NIGHT = 200.00
+    # COST_PER_NIGHT = 200.00
 
-    attr_reader :room_number, :start_date, :end_date
+    attr_reader :room_number, :start_date, :end_date, :rate
 
-    def initialize(room_number, start_date, end_date)
+    def initialize(room_number, start_date, end_date, rate = 200.00)
       check_room_num(room_number)
       @room_number = room_number
       @start_date = Hotel::parse_date(start_date)
       @end_date = Hotel::parse_date(end_date)
 
       Hotel::valid_date_range(start_date, end_date)
+      @rate = rate
     end
 
     def reservation_length
@@ -20,7 +21,7 @@ module Hotel
     end
 
     def total_cost
-      reservation_length * COST_PER_NIGHT
+      reservation_length * @rate
     end
 
     def check_room_num(room_num)
