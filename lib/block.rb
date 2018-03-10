@@ -9,8 +9,8 @@ module Hotel
     def initialize(id, num_rooms, start_date, end_date, discount_rate)
       @id = id
       @num_rooms = num_rooms
-      @start_date = start_date
-      @end_date = end_date
+      @start_date = Hotel::parse_date(start_date)
+      @end_date = Hotel::parse_date(end_date)
       @discount_rate = discount_rate
       @rooms = []
 

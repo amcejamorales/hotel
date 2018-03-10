@@ -25,9 +25,9 @@ module Hotel
       rooms = @rooms_and_reservations.keys
     end # view_rooms
 
-    def reserve_room(room_num, start_date, end_date)
+    def reserve_room(room_num, start_date, end_date, rate = 200.00)
       Hotel::valid_date_range(start_date, end_date)
-      new_reservation = Reservation.new(room_num, start_date, end_date)
+      new_reservation = Reservation.new(room_num, start_date, end_date, rate)
       @rooms_and_reservations[room_num] << new_reservation
       new_reservation
     end # reserve_room
@@ -111,8 +111,12 @@ module Hotel
 
     def reserve_in_block(block_id)
       block = find_block(block_id)
+      available = available_in_block(block_id)
 
-      reservation = reserve_room(block.rooms[0], block.start_date, block.end_date)
+      # raise an error if no more rooms are available in block
+
+      reservation = reserve_room(available[0], block.start_date, block.end_date, block.discount_rate)
+      reservation
     end # reserve_in_block
 
     def available_in_block(block_id)

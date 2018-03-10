@@ -376,24 +376,38 @@ describe Hotel::ReservationManager do
   describe "#reserve_in_block" do
     before do
       @reservation_manager.generate_block(5, "2018-04-05", "2018-04-10", 150.00)
+      @block = @reservation_manager.blocks[0]
+      @block_id = @block.id
+      @block_room_one_reservations = @block.rooms[0]
     end
 
     # raise error if block does not exist
 
     it "makes a reservation within a block" do
-      block = @reservation_manager.blocks[0]
-      block.id.must_equal 1
-
-      reservations_before = @reservation_manager.rooms_and_reservations[block.rooms[0]]
+      reservations_before = @reservation_manager.rooms_and_reservations[@block_room_one_reservations]
 
       reservations_before.length.must_equal 0
 
-      @reservation_manager.reserve_in_block(block.id)
+      @reservation_manager.reserve_in_block(@block_id)
 
-      reservations_after = @reservation_manager.rooms_and_reservations[block.rooms[0]]
+      reservations_after = @reservation_manager.rooms_and_reservations[@block_room_one_reservations]
 
       reservations_after.length.must_equal 1
+    end
 
+    it "does not reserve a room in a block that has already been reserved" do
+      @reservation_manager.reserve_in_block(@block_id)
+      room_number = 2
+      start_date = @block.start_date
+      end_date = @block.end_date
+      discount_rate = @block.discount_rate
+
+      second_reservation = @reservation_manager.reserve_in_block(@block_id)
+
+      second_reservation.room_number.must_equal room_number
+      second_reservation.start_date.must_equal start_date
+      second_reservation.end_date.must_equal end_date
+      second_reservation.rate.must_equal discount_rate
     end
   end # describe reserve_in_block
 
@@ -460,8 +474,8 @@ describe Hotel::ReservationManager do
     it "returns the correct block" do
       block_id = 2
       available_rooms = (1..3).to_a
-      start_date = "2018-05-05"
-      end_date = "2018-05-10"
+      start_date = Hotel::parse_date("2018-05-05")
+      end_date = Hotel::parse_date("2018-05-10")
       discount_rate = 170.00
 
       @block.id.must_equal block_id
@@ -471,5 +485,5 @@ describe Hotel::ReservationManager do
       @block.discount_rate.must_equal discount_rate
     end
   end # describe #find_block
-  
+
 end # describe ReservationManager
