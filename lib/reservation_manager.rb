@@ -133,6 +133,12 @@ module Hotel
         raise StandardError.new("There are no rooms available between #{start_date} and #{end_date}")
       end
 
+      reserved = reserved?(room_number, start_date, end_date)
+
+      if reserved
+        raise StandardError.new("Room #{room_number} has already been reserved.")
+      end
+
       new_reservation = reserve_room(room_number, start_date, end_date, guest)
     end
 

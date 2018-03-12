@@ -315,30 +315,21 @@ describe Hotel::ReservationManager do
       @result.room_number.must_equal first_available
     end
 
-    it "selects the first available room for the given date range" do
+    it "creates a reservation for the selected room if it's available" do
       next_available = @available_rooms[1]
 
       next_available.must_equal 2
 
       result = @reservation_manager.reserve_available(next_available, "2018-04-10", "2018-04-12", @guest)
       result.room_number.must_equal next_available
-
-      next_available = @available_rooms[2]
-
-      next_available.must_equal 3
-
-      result = @reservation_manager.reserve_available(next_available, "2018-04-10", "2018-04-12", @guest)
-      result.room_number.must_equal next_available
-
-      next_available = @available_rooms[3]
-
-      next_available.must_equal @available_rooms[3]
-
-      result = @reservation_manager.reserve_available(next_available, "2018-04-10", "2018-04-12", @guest)
-      result.room_number.must_equal next_available
     end
 
-    it "pushes the created reservation to the array corresponding to the first available room number in the rooms_and_reservations array" do
+    it "raises an error if you try to reserve a room that has already been reserved for the date range provided" do
+      result = proc { @reservation_manager.reserve_available(1, "2018-04-10", "2018-04-12", @guest) }
+      result.must_raise StandardError
+    end
+
+    it "pushes the created reservation to the array corresponding to the selected room in the rooms_and_reservations array" do
       @available_rooms.first.must_equal 1
 
       first_room = @reservation_manager.find_room_info(1)
@@ -471,7 +462,7 @@ describe Hotel::ReservationManager do
       reservations_after.length.must_equal 1
     end
 
-    it "does not reserve a room in a block that has already been reserved" do
+    it "raises an error if you try to reserve a room in a block that has already been reserved" do
       @reservation_manager.reserve_in_block(@block_id, @block_first_room, @guest)
 
       result  = proc { @reservation_manager.reserve_in_block(@block_id, @block_first_room, @guest) }
