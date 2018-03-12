@@ -54,13 +54,13 @@ module Hotel
       @guests.length + 1
     end # generate_guest_id
 
-    def find_guest(guest)
+    def find_guest(guest_id, guest_name)
       found_guest = @guests.select { |guest_info|
-        guest_info.id == guest.id
-        guest_info.name == guest.name
+        guest_info.id == guest_id
+        guest_info.name == guest_name
       }.first
       if found_guest.nil?
-        raise ArgumentError.new("Guest #{guest.name} does not exist in our records.")
+        raise ArgumentError.new("Guest #{guest_name} does not exist in our records.")
       end
       found_guest
     end # find_guest
@@ -78,7 +78,7 @@ module Hotel
 
       new_reservation = Reservation.new(room_num, start_date, end_date, guest, rate)
 
-      new_guest = !find_guest(guest)
+      new_guest = !find_guest(guest.id, guest.name)
       @guests << guest if new_guest
 
       room_info[:reservations] << new_reservation

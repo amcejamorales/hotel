@@ -104,12 +104,12 @@ describe Hotel::ReservationManager do
 
   describe "#find_guest" do
     it "returns the guest entered if the guest exists in the guests array" do
-      result = @reservation_manager.find_guest(@guest)
+      result = @reservation_manager.find_guest(@guest.id, @guest.name)
       result.must_equal @reservation_manager.guests.first
     end
     it "raises an error if the guest entered does not exist in the guests array" do
       new_guest = Hotel::Guest.new(2, "Tony Stark", "(708) 555-555", "5555-6666-7777-8888")
-      result = proc { @reservation_manager.find_guest(new_guest) }
+      result = proc { @reservation_manager.find_guest(new_guest.id, new_guest.name) }
       result.must_raise ArgumentError
     end
   end # describe #find_guest
