@@ -297,13 +297,13 @@ describe Hotel::ReservationManager do
 
       @available_rooms = @reservation_manager.view_available("2018-04-10", "2018-04-12")
 
-      @result = @reservation_manager.reserve_available("2018-04-10", "2018-04-12", @guest)
+      @result = @reservation_manager.reserve_available(1, "2018-04-10", "2018-04-12", @guest)
     end
 
     it "raises an error if no rooms are available" do
-      15.times do @reservation_manager.reserve_available("2018-04-03", "2018-04-12", @guest)
+      (6..20).each do |room_num| @reservation_manager.reserve_available(room_num, "2018-04-03", "2018-04-12", @guest)
       end
-      result = proc { @reservation_manager.reserve_available("2018-04-03", "2018-04-12", @guest) }
+      result = proc { @reservation_manager.reserve_available(2, "2018-04-03", "2018-04-12", @guest) }
       result.must_raise StandardError
     end
 
@@ -320,21 +320,21 @@ describe Hotel::ReservationManager do
 
       next_available.must_equal 2
 
-      result = @reservation_manager.reserve_available("2018-04-10", "2018-04-12", @guest)
+      result = @reservation_manager.reserve_available(next_available, "2018-04-10", "2018-04-12", @guest)
       result.room_number.must_equal next_available
 
       next_available = @available_rooms[2]
 
       next_available.must_equal 3
 
-      result = @reservation_manager.reserve_available("2018-04-10", "2018-04-12", @guest)
+      result = @reservation_manager.reserve_available(next_available, "2018-04-10", "2018-04-12", @guest)
       result.room_number.must_equal next_available
 
       next_available = @available_rooms[3]
 
       next_available.must_equal @available_rooms[3]
 
-      result = @reservation_manager.reserve_available("2018-04-10", "2018-04-12", @guest)
+      result = @reservation_manager.reserve_available(next_available, "2018-04-10", "2018-04-12", @guest)
       result.room_number.must_equal next_available
     end
 
@@ -355,7 +355,8 @@ describe Hotel::ReservationManager do
       @reservation_manager.generate_block(5, "2018-04-10", "2018-04-12", 150.00)
 
       available_for_general_public = available_rooms[5..-1]
-      public_reservation = @reservation_manager.reserve_available("2018-04-10", "2018-04-12", @guest)
+      room_number = available_rooms[5]
+      public_reservation = @reservation_manager.reserve_available(room_number, "2018-04-10", "2018-04-12", @guest)
       public_reservation.room_number.must_equal available_for_general_public[0]
     end
 
@@ -371,7 +372,8 @@ describe Hotel::ReservationManager do
     end
 
     it "pushes the first available rooms into the block's rooms array, as many as were requested" do
-      @reservation_manager.reserve_available("2018-05-05", "2018-05-10", @guest)
+      next_available = (@reservation_manager.view_available("2018-05-05", "2018-05-10")).first
+      @reservation_manager.reserve_available(next_available, "2018-05-05", "2018-05-10", @guest)
       available = @reservation_manager.view_available("2018-05-05", "2018-05-10")
       first_five_available = available[0...5]
       first_five_available.must_equal [7, 8, 9, 10, 11]
@@ -382,7 +384,7 @@ describe Hotel::ReservationManager do
     it "pushes the newly created block to the reservation manager's list of blocks" do
       reservation_manager = Hotel::ReservationManager.new
       new_guest = reservation_manager.create_new_guest("Tony Stark", "(708) 555-555", "5555-6666-7777-8888")
-      reservation_manager.reserve_available("2018-05-05", "2018-05-10", new_guest)
+      reservation_manager.reserve_available(1, "2018-05-05", "2018-05-10", new_guest)
       reservation_manager.blocks.must_be_empty
 
       result = reservation_manager.generate_block(5, "2018-05-05", "2018-05-10", 150.00)

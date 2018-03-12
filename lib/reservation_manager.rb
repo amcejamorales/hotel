@@ -126,16 +126,14 @@ module Hotel
       available_rooms
     end # def view_available
 
-    def reserve_available(start_date, end_date, guest)
+    def reserve_available(room_number, start_date, end_date, guest)
       available_rooms = view_available(start_date, end_date)
 
       if available_rooms.empty?
         raise StandardError.new("There are no rooms available between #{start_date} and #{end_date}")
       end
 
-      first_available = available_rooms.first
-
-      new_reservation = reserve_room(first_available, start_date, end_date, guest)
+      new_reservation = reserve_room(room_number, start_date, end_date, guest)
     end
 
     def generate_block(num_rooms, start_date, end_date, discount_rate)

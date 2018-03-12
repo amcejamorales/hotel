@@ -101,7 +101,13 @@ module Hotel
 
       guest = guest_status_and_info
 
-      reservation = @reservation_manager.reserve_available(start_date, end_date, guest)
+      puts "Here are the available rooms."
+      available_rooms = @reservation_manager.view_available(start_date, end_date)
+      puts "#{available_rooms}"
+      puts "Please choose one of the above."
+      room_number = gets.chomp.to_i
+
+      reservation = @reservation_manager.reserve_available(room_number, start_date, end_date, guest)
       puts "\n
       Reservation for room #{reservation.room_number} from #{reservation.start_date} to #{reservation.end_date} has been booked successfully for #{guest.name} at $#{reservation.rate} per night.
       \n"
@@ -156,6 +162,7 @@ end # module Hotel
 
 reservation_manager = Hotel::ReservationManager.new
 reservation_manager.generate_block(5, "2018-04-10", "2018-04-15", 150.00)
+reservation_manager.create_new_guest("Diana Prince", "(210) 555-5555", "1111-2222-3333-4444")
 
 session = Hotel::Session.new(reservation_manager)
 
