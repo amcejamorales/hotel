@@ -5,13 +5,14 @@ module Hotel
 
     attr_reader :room_number, :start_date, :end_date, :rate
 
-    def initialize(room_number, start_date, end_date, rate = 200.00)
+    def initialize(room_number, start_date, end_date, guest, rate = 200.00)
       check_room_num(room_number)
       @room_number = room_number
       @start_date = Hotel::parse_date(start_date)
       @end_date = Hotel::parse_date(end_date)
 
       Hotel::valid_date_range(start_date, end_date)
+      @guest = guest
       @rate = rate
     end
 

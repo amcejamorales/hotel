@@ -4,7 +4,8 @@ describe Hotel::Reservation do
 
   before do
     COST_PER_NIGHT = 200.00
-    @reservation_one = Hotel::Reservation.new(1, "2018-04-05", "2018-04-10")
+    @guest = Hotel::Guest.new(1, "Sam Jackson", "(610) 555-555", "1111-2222-3333-4444")
+    @reservation_one = Hotel::Reservation.new(1, "2018-04-05", "2018-04-10", @guest)
   end
 
   describe "#initialize" do
@@ -41,7 +42,7 @@ describe Hotel::Reservation do
     end
 
     it "returns 1 for a two-day, one-night reservation" do
-      reservation_three = Hotel::Reservation.new(1, "2018-04-05", "2018-04-06")
+      reservation_three = Hotel::Reservation.new(1, "2018-04-05", "2018-04-06", @guest)
       num_nights = (Date.parse("2018-04-06") - Date.parse("2018-04-05")).to_i
       num_nights.must_equal 1
 

@@ -1,16 +1,18 @@
 require_relative 'reservation'
 require_relative 'block'
+require_relative 'guest'
 require 'pry'
 require 'date'
 
 module Hotel
   class ReservationManager
 
-    attr_reader :rooms_and_reservations, :blocks
+    attr_reader :rooms_and_reservations, :blocks, :guests
 
     def initialize
       @rooms_and_reservations = generate_rooms
       @blocks = []
+      @guests = []
     end # initialize
 
     def generate_rooms
@@ -41,7 +43,29 @@ module Hotel
       end
     end # view_rooms
 
-    def reserve_room(room_num, start_date, end_date, rate = 200.00)
+    def create_new_guest(name, phone, credit_card_number)
+      id = generate_guest_id
+      new_guest = Hotel::Guest.new(id, name, phone, credit_card_number)
+      @guests << new_guest
+      new_guest
+    end # create_new_guest
+
+    def generate_guest_id
+      @guests.length + 1
+    end # generate_guest_id
+
+    def find_guest(guest)
+      found_guest = @guests.select { |guest_info|
+        guest_info.id == guest.id
+        guest_info.name == guest.name
+      }.first
+      if found_guest.nil?
+        raise ArgumentError.new("Guest #{guest.name} does not exist in our records.")
+      end
+      found_guest
+    end # find_guest
+
+    def reserve_room(room_num, start_date, end_date, guest, rate = 200.00)
       Hotel::valid_date_range(start_date, end_date)
       room_info = find_room_info(room_num)
       room_rate = room_info[:rate]
@@ -52,7 +76,10 @@ module Hotel
         rate = [rate, room_rate].min
       end
 
-      new_reservation = Reservation.new(room_num, start_date, end_date, rate)
+      new_reservation = Reservation.new(room_num, start_date, end_date, guest, rate)
+
+      new_guest = !find_guest(guest)
+      @guests << guest if new_guest
 
       room_info[:reservations] << new_reservation
 
@@ -99,7 +126,7 @@ module Hotel
       available_rooms
     end # def view_available
 
-    def reserve_available(start_date, end_date)
+    def reserve_available(start_date, end_date, guest)
       available_rooms = view_available(start_date, end_date)
 
       if available_rooms.empty?
@@ -108,7 +135,7 @@ module Hotel
 
       first_available = available_rooms.first
 
-      new_reservation = reserve_room(first_available, start_date, end_date)
+      new_reservation = reserve_room(first_available, start_date, end_date, guest)
     end
 
     def generate_block(num_rooms, start_date, end_date, discount_rate)
@@ -147,7 +174,7 @@ module Hotel
       in_block
     end # in_block?
 
-    def reserve_in_block(block_id)
+    def reserve_in_block(block_id, guest)
       block = find_block(block_id)
       available = available_in_block(block_id)
 
@@ -155,7 +182,9 @@ module Hotel
         raise StandardError.new("There are no more rooms available in block #{block_id}.")
       end
 
-      reservation = reserve_room(available[0], block.start_date, block.end_date, block.discount_rate)
+      reservation = reserve_room(available[0], block.start_date, block.end_date,
+      guest,
+      block.discount_rate)
       reservation
     end # reserve_in_block
 
