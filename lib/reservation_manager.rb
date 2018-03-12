@@ -36,26 +36,45 @@ module Hotel
     end # set_room_rate
 
     def view_rooms
-      rooms = @rooms_and_reservations.keys
+      rooms = @rooms_and_reservations.map do |room_info|
+        room_info[:room_number]
+      end
     end # view_rooms
 
     def reserve_room(room_num, start_date, end_date, rate = 200.00)
       Hotel::valid_date_range(start_date, end_date)
+      room_info = find_room_info(room_num)
+      room_rate = room_info[:rate]
+
+      if rate == 200.00
+        rate = room_rate
+      elsif rate != 200.00
+        rate = [rate, room_rate].min
+      end
+
       new_reservation = Reservation.new(room_num, start_date, end_date, rate)
-      @rooms_and_reservations[room_num] << new_reservation
+
+      room_info[:reservations] << new_reservation
+
       new_reservation
     end # reserve_room
+
+    def find_room_info(room_number)
+      room_info = @rooms_and_reservations.select { |room_info|
+        room_info[:room_number] == room_number
+      }.first
+      room_info
+    end # find_room_info
 
     def reservations_on(date_string)
       date = Hotel::parse_date(date_string)
       reservations_on_date = []
       @rooms_and_reservations.each do |room, reservations|
-        reservations.each do  |reservation|
-          overlap = Hotel::overlap?(date, date, reservation.start_date, reservation.end_date)
-
-          if overlap
-            reservations_on_date << reservation
-          end
+        # possible to do an optional argument of end_date = start_date? in reserved?
+        overlap = reserved?(room[:room_number], date, date)
+        reservations = room[:reservations]
+        reservations.each do |reservation|
+          reservations_on_date << reservation if overlap
         end
       end
       reservations_on_date
@@ -65,14 +84,15 @@ module Hotel
       unavailable = []
 
       @rooms_and_reservations.each do |room , reservations|
-        unavailable << room if in_block?(room, start_date, end_date)
-        overlap = reserved?(room, start_date, end_date)
-        unavailable << room if overlap
+        unavailable << room[:room_number] if in_block?(room[:room_number], start_date, end_date)
+
+        overlap = reserved?(room[:room_number], start_date, end_date)
+        unavailable << room[:room_number] if overlap
       end
 
       available_rooms = view_rooms
 
-      available_rooms = available_rooms.select do |room|
+      available_rooms.select! do |room|
         !unavailable.include?(room)
       end
 
@@ -95,6 +115,8 @@ module Hotel
       block_id = generate_block_id
       block = Hotel::Block.new(block_id, num_rooms, start_date, end_date, discount_rate)
 
+      # binding.pry
+
       available_rooms = view_available(start_date, end_date)
 
       if num_rooms > available_rooms.length
@@ -114,11 +136,11 @@ module Hotel
       @blocks.length + 1
     end
 
-    def in_block?(room_num, start_date, end_date)
+    def in_block?(room, start_date, end_date)
       in_block = false
       @blocks.each do |block|
         overlap = Hotel::overlap?(start_date, end_date, block.start_date, block.end_date)
-        if overlap && block.rooms.include?(room_num)
+        if overlap && block.rooms.include?(room)
           in_block = true
         end
       end
@@ -148,7 +170,8 @@ module Hotel
     end # available_in_block
 
     def reserved?(room_number, start_date, end_date)
-      room_reservations = @rooms_and_reservations[room_number]
+      room_info = find_room_info(room_number)
+      room_reservations = room_info[:reservations]
       overlap = false
       room_reservations.each do |reservation|
         overlap = Hotel::overlap?(start_date, end_date, reservation.start_date, reservation.end_date)
