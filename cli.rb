@@ -63,7 +63,7 @@ module Hotel
     end # continue?
 
     def conclude
-      puts "\nSession ended.\n"
+      puts "\nSession complete.\n"
       puts "\n=========================="
     end # conclude
 
@@ -133,12 +133,15 @@ module Hotel
       block_id = gets.chomp.to_i
       block = @reservation_manager.find_block(block_id)
 
-      # puts "The following rooms are available in block #{block.id}: "
-      # puts @reservation_manager.available_in_block
-      # puts "Which room would you like to reserve?"
+      puts "The following rooms are available in block #{block.id}: "
+      available_rooms = @reservation_manager.available_in_block(block.id)
+      puts "#{available_rooms}"
+      puts "Please choose one of the above."
+      room_number = gets.chomp.to_i
+
       guest = guest_status_and_info
 
-      reservation = @reservation_manager.reserve_in_block(block_id, guest)
+      reservation = @reservation_manager.reserve_in_block(block_id, room_number, guest)
 
       puts "Room number #{reservation.room_number} has been booked from #{reservation.start_date} to #{reservation.end_date} for #{guest.name} in block #{block_id} at $" '%.2f' % "#{reservation.rate}" + " per night."
     end # reserve_from_block

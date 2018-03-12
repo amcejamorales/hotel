@@ -453,7 +453,7 @@ describe Hotel::ReservationManager do
     end
 
     it "returns an instance of  Reservation" do
-      reservation = @reservation_manager.reserve_in_block(@block_id, @guest)
+      reservation = @reservation_manager.reserve_in_block(@block_id, @block_first_room, @guest)
       reservation.must_be_instance_of Hotel::Reservation
     end
 
@@ -464,7 +464,7 @@ describe Hotel::ReservationManager do
 
       reservations.length.must_equal 0
 
-      @reservation_manager.reserve_in_block(@block_id, @guest)
+      @reservation_manager.reserve_in_block(@block_id, @block_first_room, @guest)
 
       reservations_after = room_info[:reservations]
 
@@ -472,25 +472,18 @@ describe Hotel::ReservationManager do
     end
 
     it "does not reserve a room in a block that has already been reserved" do
-      @reservation_manager.reserve_in_block(@block_id, @guest)
-      room_number = 2
-      start_date = @block.start_date
-      end_date = @block.end_date
-      discount_rate = @block.discount_rate
+      @reservation_manager.reserve_in_block(@block_id, @block_first_room, @guest)
 
-      second_reservation = @reservation_manager.reserve_in_block(@block_id, @guest)
+      result  = proc { @reservation_manager.reserve_in_block(@block_id, @block_first_room, @guest) }
 
-      second_reservation.room_number.must_equal room_number
-      second_reservation.start_date.must_equal start_date
-      second_reservation.end_date.must_equal end_date
-      second_reservation.rate.must_equal discount_rate
+      result.must_raise StandardError
     end
 
     it "raises an error if there are no more available rooms in a block" do
-      5.times do
-        @reservation_manager.reserve_in_block(@block_id, @guest)
+      (1..5).each do |room_num|
+        @reservation_manager.reserve_in_block(@block_id, room_num, @guest)
       end
-      result = proc { @reservation_manager.reserve_in_block(@block_id, @guest) }
+      result = proc { @reservation_manager.reserve_in_block(@block_id, 1, @guest) }
 
       result.must_raise StandardError
     end
@@ -499,7 +492,7 @@ describe Hotel::ReservationManager do
       num_nights = @block.end_date - @block.start_date
       total_cost = num_nights * @block.discount_rate
 
-      reservation = @reservation_manager.reserve_in_block(@block_id, @guest)
+      reservation = @reservation_manager.reserve_in_block(@block_id, @block_first_room, @guest)
 
       reservation.room_number.must_equal @block.rooms[0]
       reservation.start_date.must_equal @block.start_date
@@ -513,7 +506,7 @@ describe Hotel::ReservationManager do
     before do
       @block_id = 1
       @reservation_manager.generate_block(5, "2018-04-05", "2018-04-10", 150.00)
-      @reservation_manager.reserve_in_block(@block_id, @guest)
+      @reservation_manager.reserve_in_block(@block_id, 1, @guest)
       @result = @reservation_manager.available_in_block(@block_id)
     end
 

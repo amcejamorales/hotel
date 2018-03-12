@@ -172,7 +172,7 @@ module Hotel
       in_block
     end # in_block?
 
-    def reserve_in_block(block_id, guest)
+    def reserve_in_block(block_id, room_number, guest)
       block = find_block(block_id)
       available = available_in_block(block_id)
 
@@ -180,7 +180,13 @@ module Hotel
         raise StandardError.new("There are no more rooms available in block #{block_id}.")
       end
 
-      reservation = reserve_room(available[0], block.start_date, block.end_date,
+      reserved = reserved?(room_number, block.start_date, block.end_date)
+
+      if reserved
+        raise StandardError.new("Room #{room_number} has already been reserved in block #{block.id}.")
+      end
+
+      reservation = reserve_room(room_number, block.start_date, block.end_date,
       guest,
       block.discount_rate)
       reservation
