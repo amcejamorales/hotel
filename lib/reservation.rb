@@ -34,5 +34,14 @@ module Hotel
       end
     end
 
+    def adjust_rate_if_needed(rate_from_arguments, room_rate)
+      if rate_from_arguments == 200.00
+        @rate = room_rate
+      elsif rate_from_arguments != 200.00
+        @rate = [rate_from_arguments, room_rate].min
+      end
+      return @rate
+    end
+
   end # class Reservation
 end # module Hotel

@@ -19,6 +19,24 @@ module Hotel
       end
     end
 
+    def fill_rooms(available, num_rooms)
+      available[0...num_rooms].each do |room|
+        @rooms << room
+      end
+    end
+
+    def room_in_block?(room, start_date, end_date)
+      overlap = Hotel::overlap?(start_date, end_date, @start_date, @end_date)
+      if overlap && @rooms.include?(room)
+        return true
+      end
+      return false
+    end
+
+    def find_block(block_id)
+      return @id == block_id
+    end
+
   end # class Block
 
 end # module Hotel

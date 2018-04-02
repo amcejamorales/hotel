@@ -52,7 +52,11 @@ describe Hotel::Reservation do
     end
 
     it "returns 0 for a one-day, zero-night reservation" do
-      skip
+      reservation = Hotel::Reservation.new(10, "2018-04-05", "2018-04-05", @guest)
+      num_nights = (Date.parse("2018-04-05") - Date.parse("2018-04-05")).to_i
+      num_nights.must_equal 0
+      result = reservation.reservation_length
+      result.must_equal num_nights
     end
 
   end # describe reservation_length

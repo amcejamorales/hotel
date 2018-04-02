@@ -41,4 +41,8 @@ module Hotel
     end
     true
   end # valid_date_range
+
+  def self.generate_id(array)
+    array.length + 1
+  end # generate_id
 end

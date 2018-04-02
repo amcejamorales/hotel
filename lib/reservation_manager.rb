@@ -51,14 +51,14 @@ module Hotel
     end # create_new_guest
 
     def generate_guest_id
-      @guests.length + 1
+      Hotel::generate_id(@guests)
     end # generate_guest_id
 
     def find_guest(guest_id, guest_name)
-      found_guest = @guests.select { |guest_info|
-        guest_info.id == guest_id
-        guest_info.name == guest_name
+      found_guest = @guests.select { |guest|
+        guest.find_guest(guest_id, guest_name)
       }.first
+
       if found_guest.nil?
         raise ArgumentError.new("Guest #{guest_name} does not exist in our records.")
       end
@@ -70,13 +70,9 @@ module Hotel
       room_info = find_room_info(room_num)
       room_rate = room_info[:rate]
 
-      if rate == 200.00
-        rate = room_rate
-      elsif rate != 200.00
-        rate = [rate, room_rate].min
-      end
+      new_reservation = Reservation.new(room_num, start_date, end_date, guest)
 
-      new_reservation = Reservation.new(room_num, start_date, end_date, guest, rate)
+      new_reservation.adjust_rate_if_needed(rate, room_rate)
 
       new_guest = !find_guest(guest.id, guest.name)
       @guests << guest if new_guest
@@ -97,7 +93,6 @@ module Hotel
       date = Hotel::parse_date(date_string)
       reservations_on_date = []
       @rooms_and_reservations.each do |room, reservations|
-        # possible to do an optional argument of end_date = start_date? in reserved?
         overlap = reserved?(room[:room_number], date, date)
         reservations = room[:reservations]
         reservations.each do |reservation|
@@ -111,10 +106,11 @@ module Hotel
       unavailable = []
 
       @rooms_and_reservations.each do |room , reservations|
-        unavailable << room[:room_number] if in_block?(room[:room_number], start_date, end_date)
+        room_number = room[:room_number]
+        unavailable << room_number if in_block?(room_number, start_date, end_date)
 
-        overlap = reserved?(room[:room_number], start_date, end_date)
-        unavailable << room[:room_number] if overlap
+        overlap = reserved?(room_number, start_date, end_date)
+        unavailable << room_number if overlap
       end
 
       available_rooms = view_rooms
@@ -146,17 +142,13 @@ module Hotel
       block_id = generate_block_id
       block = Hotel::Block.new(block_id, num_rooms, start_date, end_date, discount_rate)
 
-      # binding.pry
-
       available_rooms = view_available(start_date, end_date)
 
       if num_rooms > available_rooms.length
         raise StandardError.new("There aren't enough rooms to create a block between #{start_date} and #{end_date}.")
       end
 
-      available_rooms[0...num_rooms].each do |room|
-        block.rooms << room
-      end
+      block.fill_rooms(available_rooms, num_rooms)
 
       @blocks << block
 
@@ -164,16 +156,13 @@ module Hotel
     end # generate_block
 
     def generate_block_id
-      @blocks.length + 1
+      Hotel::generate_id(@blocks)
     end
 
     def in_block?(room, start_date, end_date)
       in_block = false
       @blocks.each do |block|
-        overlap = Hotel::overlap?(start_date, end_date, block.start_date, block.end_date)
-        if overlap && block.rooms.include?(room)
-          in_block = true
-        end
+        in_block = block.room_in_block?(room, start_date, end_date)
       end
       in_block
     end # in_block?
@@ -214,7 +203,7 @@ module Hotel
       overlap = false
       room_reservations.each do |reservation|
         overlap = Hotel::overlap?(start_date, end_date, reservation.start_date, reservation.end_date)
-        return overlap if overlap
+        return true if overlap
       end
       overlap
     end # reserved
@@ -227,7 +216,7 @@ module Hotel
         raise ArgumentError.new("Block #{block_id} does not exist.")
       end
 
-      @blocks.select { |block| block.id == block_id }.first
+      @blocks.select { |block| block.find_block(block_id) }.first
     end # find_block
 
   end # class ReservationManager
