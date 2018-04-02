@@ -35,4 +35,22 @@ A. The second implementation because no class is aware of the data in another cl
 
 9. Q. Bonus question once you've read Metz ch. 3: Which implementation is more loosely coupled?  
 A. The second implementation is more loosely coupled because classes are unaware of the data in another class and therefore instead of calling on other classes' instance variables, they call on other classes' instance methods. They trust that the other method will respond to these method names and that these methods will perform the appropriate behavior. Furthermore, in some cases the classes aren't even aware of the existence of other classes. For example, it's true that the Order class is instantiated with a brand new object of class ShoppingCart. Therefore, class Order knows that class ShoppingCart exists.
-However, ShoppingCart is instantiated with an empty array that will presumably be filled with items of class CartEntry, but this won't strictly be the case. ShoppingCart's @entries instance variable can take any items and its 'price' method can still work if these items respond to their own 'price' method. Therefore ShoppingCart can be reused elsewhere AND be unaware of the existence of class CartEntry. 
+However, ShoppingCart is instantiated with an empty array that will presumably be filled with items of class CartEntry, but this won't strictly be the case. ShoppingCart's @entries instance variable can take any items and its 'price' method can still work if these items respond to their own 'price' method. Therefore ShoppingCart can be reused elsewhere AND be unaware of the existence of class CartEntry.
+
+***
+
+# Revisiting Hotel
+
+Before revisiting hotel (and even before submitting my first implementation of it) I knew my ReservationManager was really big and taking on roles that dealt closely with the data associated with other classes. Since this is my biggest class I decided to delegate some of the logic in this class's methods to lower level classes.
+
+### Related to Guest
+* find_guest: I delegated part of the logic in find_guest to another method by the same name in Guest.
+* generate_guest_id (& generate_block_id): I abstracted the logic to generate both guest and block id's and put it inside a method in the Hotel module (outside of any class).
+
+### Related to Reservation
+* reserve_room: In the spirit of single responsibility I extracted the logic that determines a room's rate (based on the input rate and the room's base rate) to a method in the Reservation class. This way reserve_room doesn't have to handle this related, but additional responsibility.
+
+### Related to Block
+* generate_block: I delegated the logic that fill's a newly generated block's rooms from generate_block to another method in Block.
+* in_block?: I delegated the logic that determines whether a room is in a block's list of rooms to another method in Block.
+* find_block: I delegated the part of the logic that determines if the block id in the input matches the block's id to another method in Block.
